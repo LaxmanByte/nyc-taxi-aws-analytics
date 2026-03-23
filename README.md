@@ -3,172 +3,122 @@
 ![AWS](https://img.shields.io/badge/AWS-Cloud-orange?logo=amazonaws)
 ![Python](https://img.shields.io/badge/Python-3.9-blue?logo=python)
 ![Status](https://img.shields.io/badge/Status-Active-green)
-![License](https://img.shields.io/badge/License-MIT-yellow)
+![Records](https://img.shields.io/badge/Records-19.6M-brightgreen)
+![Cost](https://img.shields.io/badge/Query%20Cost-%240.02-success)
 
-## Overview
-
-A fully **serverless AWS data engineering pipeline** that ingests, processes, and analyzes **2.9 million NYC Yellow Taxi trip records**. Built with cost optimization in mind — running at **under $10/month** using auto-pause serverless architecture.
-
-This project demonstrates real-world cloud data engineering skills across the full pipeline lifecycle: ingestion, transformation, warehousing, and visualization.
+Serverless AWS data pipeline processing **19.6M NYC Uber/Lyft (FHVHV) trips** from July 2025 using S3, Glue, Athena, Redshift Serverless, and Grafana Cloud.
 
 ---
 
 ## Architecture
 
-```
-NYC TLC Data (Parquet)
-        |
-        v
-   AWS S3 (Raw Data Lake)
-        |
-        v
-  AWS Glue Crawler (Schema Discovery - 19 columns)
-        |
-        v
-  AWS Glue ETL Job (Python - Transformation)
-        |
-        v
-  AWS Athena (SQL Analytics on S3)
-        |
-        v
-  Redshift Serverless (Data Warehouse)
-        |
-        v
-  Grafana Dashboards (Visualization)
-```
+![Architecture Diagram](docs/architecture/architecture-diagram.png)
 
----
-
-## Key Features
-
-- **2.9M records** processed from NYC TLC Yellow Taxi dataset
-- **Automated schema discovery** via Glue Crawler (19 columns detected)
-- **10x query performance** improvement using Redshift `SORTKEY` and `DISTKEY`
-- **5 analytical views**: daily revenue trends, peak hour analysis, payment distribution, top routes, trip duration analysis
-- **Least-privilege IAM roles** applied throughout for security best practices
-- **Sub-$10/month** cost using Redshift Serverless auto-pause feature
-- **Parquet format** used for columnar storage efficiency
+**Pipeline:** NYC TLC Open Data → S3 Data Lake → AWS Glue ETL → Amazon Athena → Redshift Serverless → Grafana Cloud
 
 ---
 
 ## Tech Stack
 
-| Service | Purpose |
-|---|---|
-| AWS S3 | Raw & processed data lake storage |
-| AWS Glue Crawler | Automated schema discovery |
-| AWS Glue ETL | Data transformation jobs |
-| AWS Athena | Serverless SQL analytics on S3 |
-| Redshift Serverless | Cloud data warehouse |
-| Grafana | Dashboard visualization |
-| AWS IAM | Least-privilege access control |
-| Python 3.9 | ETL scripting |
-| SQL | Analytics & reporting queries |
-| Parquet | Columnar file format |
+| Service | Role |
+|---------|------|
+| Amazon S3 | Data lake — raw + processed parquet files |
+| AWS Glue | Serverless ETL + schema catalog |
+| Amazon Athena | Serverless SQL — pay-per-query (~$0.02 total) |
+| Redshift Serverless | Columnar warehouse with SORTKEY/DISTKEY |
+| AWS Lambda + Step Functions | Orchestration and automation |
+| IAM | Least-privilege security (grafana-readonly user) |
+| Grafana Cloud | 5-panel live dashboard |
 
 ---
 
-## Analytical Dashboards
+## Key Results
 
-Built **5 Grafana dashboards** with the following insights:
-
-| Dashboard | Type | Insight |
-|---|---|---|
-| Daily Revenue Trends | Line Graph | Revenue over time |
-| Peak Hour Analysis | Bar Chart | Busiest trip hours |
-| Payment Distribution | Pie Chart | Cash vs Card usage |
-| Top Routes by Fare | Table | Highest earning routes |
-| Trip Duration Analysis | Histogram | Average trip lengths |
+- **19.6M trips** processed from FHVHV_tripdata_2025-07
+- **~$0.02 total** Athena query cost across all 5 analyses
+- **Peak demand** at 6PM (1.14M trips/hour)
+- **97% solo rides** vs 3% shared
+- **~$6 platform cut** per trip (Uber/Lyft take rate)
+- **10x faster** queries with Redshift SORTKEY + DISTKEY optimization
 
 ---
 
-## Project Structure
+## Grafana Dashboard
+
+### Full Dashboard
+![Full Dashboard](nyc-taxi-analytics-aws/screenshots/full_dashboard_all_1_5_panels.png)
+
+### Panel 1 — Athena Data Source Connected
+![Athena Connected](nyc-taxi-analytics-aws/screenshots/01_grafana_athena_datasource_connected.png)
+
+### Panel 2 — Peak Hours Bar Chart
+![Peak Hours](nyc-taxi-analytics-aws/screenshots/02_panel_peak_hours_bar_chart_with_query.png)
+
+### Panel 3 — Daily Trip Volume
+![Daily Volume](nyc-taxi-analytics-aws/screenshots/03_panel_daily_trip_volume_line_chart_with_query.png)
+
+### Panel 4 — Trip Duration Breakdown
+![Trip Duration](nyc-taxi-analytics-aws/screenshots/04_panel_trip_duration_pie_chart_with_query.png)
+
+### Panel 5 — Shared vs Solo Rides
+![Shared vs Solo](nyc-taxi-analytics-aws/screenshots/05_panel_shared_vs_solo_with_query.png)
+
+### Panel 6 — Driver Pay vs Platform Cut
+![Driver Pay](nyc-taxi-analytics-aws/screenshots/06_panel_driver_pay_vs_platform_cut_timeseries_with_query.png)
+
+---
+
+## AWS Setup Screenshots
+
+### Day 1 — S3, Glue, Athena
+| Screenshot | Description |
+|-----------|-------------|
+| ![S3 Bucket](nyc-taxi-analytics-aws/screenshots/day-1/Created_s3_bucket.png) | S3 bucket created |
+| ![S3 Data](nyc-taxi-analytics-aws/screenshots/day-1/s3-raw-data-uploaded.png) | Raw data uploaded |
+| ![Medallion](nyc-taxi-analytics-aws/screenshots/day-1/Three_Prefixes%20(Medallion%20Folders).png) | Medallion architecture folders |
+| ![Crawler](nyc-taxi-analytics-aws/screenshots/day-1/crawler-output-db.png) | Glue crawler output |
+| ![IAM Glue](nyc-taxi-analytics-aws/screenshots/day-1/iam-glue-role-permissions.png) | IAM Glue role permissions |
+| ![Athena Q1](nyc-taxi-analytics-aws/screenshots/day-1/Athena%20query%201.png) | Athena query running |
+
+### Day 2 — Redshift Serverless + IAM + Grafana
+| Screenshot | Description |
+|-----------|-------------|
+| ![Redshift](nyc-taxi-analytics-aws/screenshots/day%20-2/serverless_redshift.png) | Redshift Serverless setup |
+| ![IAM User](nyc-taxi-analytics-aws/screenshots/day%20-2/IAM%20user%20grafana-readonly.png) | grafana-readonly IAM user |
+| ![IAM Policy](nyc-taxi-analytics-aws/screenshots/day%20-2/day2-iam-policy-details.png) | IAM policy details |
+| ![Grafana Connected](nyc-taxi-analytics-aws/screenshots/day%20-2/grafana_connected.png) | Grafana connected to Athena |
+
+---
+
+## Repository Structure
 
 ```
 nyc-taxi-aws-analytics/
 ├── README.md
 ├── .gitignore
+├── docs/
+│   └── architecture/
+│       └── architecture-diagram.png
 ├── scripts/
 │   ├── glue/
-│   │   └── glue_etl_job.py        # Glue ETL transformation job
-│   ├── sql/
-│   │   ├── analytical_views.sql   # 5 analytical SQL views
-│   │   └── redshift_setup.sql     # Redshift table setup with SORTKEY/DISTKEY
-│   └── lambda/
-│       └── trigger_glue_job.py    # Lambda trigger for pipeline
-├── infrastructure/
-│   └── cloudformation/
-│       └── pipeline_stack.yaml    # IaC for full pipeline
+│   │   └── glue_etl_job.py
+│   └── sql/
+│       ├── analytical_views.sql
+│       └── redshift_setup.sql
 ├── dashboards/
 │   └── grafana/
-│       └── dashboard.json         # Grafana dashboard export
-└── docs/
-    └── architecture/
-        └── architecture-diagram.png
+│       └── README.md
+└── nyc-taxi-analytics-aws/
+    └── screenshots/
+        ├── day-1/          (S3, Glue, Athena setup)
+        ├── day -2/         (Redshift, IAM, Grafana)
+        └── *.png           (Grafana dashboard panels)
 ```
-
----
-
-## Performance Results
-
-| Metric | Result |
-|---|---|
-| Records Processed | 2,900,000+ |
-| Columns Detected | 19 |
-| Query Performance Gain | 10x (via SORTKEY/DISTKEY) |
-| Monthly Cost | < $10/month |
-| Architecture | Fully Serverless |
-
----
-
-## Security Implementation
-
-- IAM roles follow **least-privilege principle**
-- S3 buckets configured with **block public access**
-- Redshift Serverless uses **VPC isolation**
-- Glue jobs use **dedicated IAM service roles**
-- No hardcoded credentials — all via IAM role assumptions
-
----
-
-## How to Deploy
-
-1. **Clone the repo**
-```bash
-git clone https://github.com/LaxmanByte/nyc-taxi-aws-analytics.git
-cd nyc-taxi-aws-analytics
-```
-
-2. **Upload raw data to S3**
-```bash
-aws s3 cp data/raw/ s3://your-bucket/raw/ --recursive
-```
-
-3. **Run Glue Crawler** to detect schema
-
-4. **Execute Glue ETL job**
-```bash
-aws glue start-job-run --job-name nyc-taxi-etl
-```
-
-5. **Query with Athena** using scripts in `scripts/sql/`
-
-6. **Connect Grafana** to Redshift Serverless and import `dashboards/grafana/dashboard.json`
 
 ---
 
 ## Author
 
-**Laxman Barre**
-AWS Certified Cloud Practitioner (CLF-C02)
+**Laxman Barre** | [GitHub](https://github.com/LaxmanByte) | [Grafana Dashboard](https://laxmanbarredata.grafana.net)
 
-- LinkedIn: [linkedin.com/in/laxman-barre-073735256](https://linkedin.com/in/laxman-barre-073735256)
-- GitHub: [github.com/LaxmanByte](https://github.com/LaxmanByte)
-- Email: barrelaxman@gmail.com
-- Location: Salt Lake City, UT
-
----
-
-## License
-
-MIT License — see [LICENSE](LICENSE) for details.
+AWS Cloud Practitioner | AWS Solutions Architect (in progress)
