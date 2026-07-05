@@ -1,0 +1,26 @@
+================================================================================
+CALL BOOKER — PRICING SHEET
+================================================================================
+
+PLAN 1 — SOLO          $99 / month
+  ✔ 1 phone number
+  ✔ AI call answering (24/7)
+  ✔ Appointment booking
+  ✔ SMS confirmations to customers
+  ✔ Daily call summary to owner
+  ✗ No CRM integration
+  ✗ No multi-tech scheduling
+
+PLAN 2 — BUNDLE        $249 / month
+  ✔ Everything in Solo
+  ✔ CRM / scheduling tool integration
+  ✔ Multi-technician dispatch support
+  ✔ Monthly performance report
+  ✔ Priority support (response < 4 hrs)
+  ✔ Custom greeting + voice selection
+
+FREE PILOT:
+  2-week free trial (Solo tier) — no credit card required
+  Converts to paid at end of trial if client confirms
+
+================================================================================

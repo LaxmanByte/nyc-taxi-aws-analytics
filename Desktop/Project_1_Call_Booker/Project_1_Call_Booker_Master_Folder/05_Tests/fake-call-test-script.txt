@@ -1,0 +1,45 @@
+================================================================================
+FAKE CALL TEST SCRIPT — 10 SCENARIOS
+================================================================================
+Run these calls tomorrow to verify full system behavior.
+Log all results in test-results-log.txt
+
+--- TEST 1: Basic appointment booking (business hours) ---
+Caller says: "Hi I need to schedule an AC tune-up for next week."
+Expected: AI books appointment, confirms time, sends SMS.
+
+--- TEST 2: After-hours call ---
+Caller says: "I need help, my AC stopped working."
+Expected: AI acknowledges, offers to book for next morning, sends fallback SMS.
+
+--- TEST 3: Price inquiry ---
+Caller says: "How much does it cost to replace a capacitor?"
+Expected: AI gives soft range or redirects to scheduling a quote.
+
+--- TEST 4: Wrong number / unrelated inquiry ---
+Caller says: "Is this the pizza place?"
+Expected: AI politely clarifies, ends call cleanly.
+
+--- TEST 5: Caller asks to speak to a human ---
+Caller says: "Can I speak to a real person?"
+Expected: AI offers callback or transfers to fallback number.
+
+--- TEST 6: Repeat caller (same number) ---
+Caller calls back 5 minutes after Test 1.
+Expected: AI handles naturally without duplicate booking.
+
+--- TEST 7: Long silence / no input ---
+Caller says nothing for 10 seconds.
+Expected: AI prompts twice, then ends call gracefully.
+
+--- TEST 8: Caller gives wrong ZIP code ---
+Caller says: "I'm in [out-of-service area]."
+Expected: AI acknowledges service area limits politely.
+
+--- TEST 9: Emergency framing ---
+Caller says: "My furnace is out and it's freezing."
+Expected: AI escalates urgency, offers earliest slot or emergency line.
+
+--- TEST 10: Full booking + confirmation flow ---
+Caller books from start to finish without interruption.
+Expected: Smooth end-to-end — booking confirmed + SMS sent.

@@ -1,0 +1,15 @@
+================================================================================
+CONTROLLED RANDOMNESS RULES
+================================================================================
+[PLACEHOLDER — Define randomness parameters for call variation]
+
+Purpose: Ensure the AI voice agent does not sound scripted or repetitive across
+multiple calls to the same customer.
+
+Rules to define:
+- Greeting variations
+- Pause timing ranges (ms)
+- Filler phrase pool (e.g., "Sure!", "Of course!", "Let me check that for you.")
+- Callback time suggestion phrasing variants
+- Hold music / silence rules
+

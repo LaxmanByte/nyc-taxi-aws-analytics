@@ -1,0 +1,9 @@
+================================================================================
+PROJECT 1 – CALL BOOKER | MASTER BUILD LOG
+================================================================================
+This is the ONLY file updated every session.
+Format: [DATE] | [SESSION #] | [What was done] | [What's next]
+--------------------------------------------------------------------------------
+
+[2026-04-06] | SESSION 1 | Project structure created. All folders and placeholder files initialized. | Add v1.0 of hvac-call-handler-prompt.txt tomorrow. Begin fake-call-test-script.txt.
+

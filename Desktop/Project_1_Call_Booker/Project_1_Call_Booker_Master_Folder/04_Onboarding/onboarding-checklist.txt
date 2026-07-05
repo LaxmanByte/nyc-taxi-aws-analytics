@@ -1,0 +1,35 @@
+================================================================================
+CLIENT ONBOARDING CHECKLIST — 90-MINUTE SETUP
+================================================================================
+
+SECTION 1 — Business Info (15 min)
+  [ ] Business name (exact legal name)
+  [ ] Address + service area (ZIP codes)
+  [ ] Hours of operation
+  [ ] Emergency / after-hours policy
+  [ ] Owner name + best contact number
+
+SECTION 2 — Call Flow Preferences (20 min)
+  [ ] How to greet callers?
+  [ ] Services offered (list all)
+  [ ] Pricing to share over the phone? (Y/N)
+  [ ] Who gets the call summary? (email / SMS)
+  [ ] Fallback person if AI can't handle call?
+
+SECTION 3 — Scheduling Setup (20 min)
+  [ ] Calendar tool used (Google, Housecall Pro, other?)
+  [ ] Integration access (API key or login)
+  [ ] How far out to book appointments?
+  [ ] Technician availability / dispatch rules
+
+SECTION 4 — Number + Tech Setup (20 min)
+  [ ] Twilio number provisioned?
+  [ ] Call forwarding from existing number confirmed?
+  [ ] Test call completed successfully?
+  [ ] Lambda + webhook verified live?
+
+SECTION 5 — Sign-off (15 min)
+  [ ] Client reviewed test call recording
+  [ ] Approved AI greeting + flow
+  [ ] Pilot start date confirmed: __________
+  [ ] Billing plan selected (see pricing-sheet.txt)

@@ -1,0 +1,24 @@
+================================================================================
+FALLBACK MESSAGES — SMS + EMAIL TEMPLATES
+================================================================================
+
+--- SMS FALLBACK ---
+[Template 1 — No answer / voicemail]
+"Hi {customer_name}, we missed your call at {business_name}. We'll call you back
+within {X} minutes. Or reply with a time that works for you."
+
+[Template 2 — After hours]
+"Thanks for calling {business_name}! Our office is currently closed. We'll reach
+out first thing tomorrow morning. — {business_name} Team"
+
+--- EMAIL FALLBACK ---
+Subject: We missed you — {business_name}
+Body:
+Hi {customer_name},
+
+We're sorry we missed your call. A member of our team will follow up with you
+shortly. If you need immediate assistance, please reply to this email.
+
+Best,
+{business_name} Team
+

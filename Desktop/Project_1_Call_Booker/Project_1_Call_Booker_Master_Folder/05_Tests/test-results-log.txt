@@ -1,0 +1,18 @@
+================================================================================
+TEST RESULTS LOG
+================================================================================
+Owner updates this file after every test session.
+Format: [DATE] | [Test #] | [Pass/Fail] | [Notes]
+--------------------------------------------------------------------------------
+
+[DATE] | Test 1 | [ ] | 
+[DATE] | Test 2 | [ ] | 
+[DATE] | Test 3 | [ ] | 
+[DATE] | Test 4 | [ ] | 
+[DATE] | Test 5 | [ ] | 
+[DATE] | Test 6 | [ ] | 
+[DATE] | Test 7 | [ ] | 
+[DATE] | Test 8 | [ ] | 
+[DATE] | Test 9 | [ ] | 
+[DATE] | Test 10 | [ ] | 
+

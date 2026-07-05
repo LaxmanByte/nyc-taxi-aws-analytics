@@ -1,0 +1,218 @@
+# ==============================================================================
+# CALL BOOKER — SERVERLESS FRAMEWORK v3 DEPLOYMENT
+# ==============================================================================
+# Deploy commands:
+#   serverless deploy --stage dev    # development
+#   serverless deploy --stage prod   # production
+#
+# Prerequisites:
+#   npm install -g serverless
+#   pip install serverless-python-requirements   (or use Docker bundling)
+#   AWS CLI configured with deploy permissions
+# ==============================================================================
+
+service: call-booker
+
+frameworkVersion: "3"
+
+# ------------------------------------------------------------------------------
+# Plugins
+# ------------------------------------------------------------------------------
+plugins:
+  - serverless-python-requirements   # bundles pip deps into the Lambda zip
+
+custom:
+  stage: ${opt:stage, "dev"}
+
+  # Table name includes stage so dev/prod are isolated
+  tableName: call-booker-sessions-${self:custom.stage}
+
+  # Pull from .env or CI environment — never hard-code values here
+  twilioAccountSid:  ${env:TWILIO_ACCOUNT_SID}
+  twilioAuthToken:   ${env:TWILIO_AUTH_TOKEN}
+  twilioFromNumber:  ${env:TWILIO_FROM_NUMBER}
+  ownerPhone:        ${env:OWNER_PHONE}
+  ownerEmail:        ${env:OWNER_EMAIL}
+  senderEmail:       ${env:SENDER_EMAIL}
+  calendlyLink:      ${env:CALENDLY_LINK}
+  businessName:      ${env:BUSINESS_NAME}
+  bedrockRegion:     ${env:BEDROCK_REGION, "us-east-1"}
+
+  pythonRequirements:
+    dockerizePip: non-linux    # use Docker on Mac/Windows to build Linux wheels
+    noDeploy:
+      - boto3                  # already available in the Lambda runtime
+      - botocore
+
+# ------------------------------------------------------------------------------
+# Provider
+# ------------------------------------------------------------------------------
+provider:
+  name: aws
+  runtime: python3.12
+  region: ${env:AWS_DEFAULT_REGION, "us-east-1"}
+  stage: ${self:custom.stage}
+  memorySize: 256
+  timeout: 29                  # API Gateway hard limit is 30 s
+
+  # Shared environment variables injected into every function
+  environment:
+    TWILIO_ACCOUNT_SID:      ${self:custom.twilioAccountSid}
+    TWILIO_AUTH_TOKEN:       ${self:custom.twilioAuthToken}
+    TWILIO_FROM_NUMBER:      ${self:custom.twilioFromNumber}
+    OWNER_PHONE:             ${self:custom.ownerPhone}
+    OWNER_EMAIL:             ${self:custom.ownerEmail}
+    SENDER_EMAIL:            ${self:custom.senderEmail}
+    CALENDLY_LINK:           ${self:custom.calendlyLink}
+    BUSINESS_NAME:           ${self:custom.businessName}
+    CALL_BOOKER_TABLE_NAME:  ${self:custom.tableName}
+    BEDROCK_REGION:          ${self:custom.bedrockRegion}
+
+  # IAM role statements attached to BOTH functions
+  iam:
+    role:
+      statements:
+
+        # ── DynamoDB ──────────────────────────────────────────────────────────
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:DeleteItem
+            - dynamodb:Scan              # heartbeat daily stats scan
+            - dynamodb:UpdateItem
+          Resource:
+            - !GetAtt CallBookerTable.Arn
+
+        # ── Amazon Bedrock ────────────────────────────────────────────────────
+        # Cross-region inference profile (us.*) requires the wildcard resource.
+        - Effect: Allow
+          Action:
+            - bedrock:InvokeModel
+          Resource:
+            - arn:aws:bedrock:*::foundation-model/anthropic.claude-sonnet-4-20250514-v1:0
+            - arn:aws:bedrock:*:*:inference-profile/*
+
+        # ── SES (email fallback) ──────────────────────────────────────────────
+        - Effect: Allow
+          Action:
+            - ses:SendEmail
+            - ses:SendRawEmail
+          Resource: "*"                  # SES does not support resource-level ARNs on SendEmail
+          Condition:
+            StringEquals:
+              ses:FromAddress: ${self:custom.senderEmail}
+
+        # ── SNS (optional — future SMS fan-out or alerting) ───────────────────
+        - Effect: Allow
+          Action:
+            - sns:Publish
+          Resource: "*"
+
+        # ── CloudWatch Logs (explicit — good practice) ────────────────────────
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: "arn:aws:logs:*:*:*"
+
+# ------------------------------------------------------------------------------
+# Functions
+# ------------------------------------------------------------------------------
+functions:
+
+  # ── SMS Webhook Handler ──────────────────────────────────────────────────────
+  smsWebhook:
+    handler: lambda_handler.lambda_handler
+    description: "Handles inbound Twilio SMS, drives Claude conversation, fires notifications on completion"
+    events:
+      - http:
+          path: /sms
+          method: post
+          cors: false               # Twilio does not require CORS
+    # Override timeout for webhook — Twilio expects a response within 15 s
+    timeout: 15
+
+  # ── Daily Heartbeat ──────────────────────────────────────────────────────────
+  dailyHeartbeat:
+    handler: daily-heartbeat-function.lambda_handler
+    description: "Fires every morning at 8 AM (owner timezone) — health check SMS + 24h session stats"
+    timeout: 30
+    events:
+      - schedule:
+          # 8:00 AM US/Central (CST UTC-6 / CDT UTC-5)
+          # CST  (Nov–Mar):  cron(0 14 * * ? *)
+          # CDT  (Mar–Nov):  cron(0 13 * * ? *)
+          # Change the hour to match your timezone:
+          #   EST/EDT  UTC-5/-4  →  13 / 12
+          #   CST/CDT  UTC-6/-5  →  14 / 13
+          #   MST/MDT  UTC-7/-6  →  15 / 14
+          #   PST/PDT  UTC-8/-7  →  16 / 15
+          rate: cron(0 14 * * ? *)
+          enabled: true
+          name: call-booker-heartbeat-${self:custom.stage}
+          description: "Daily 8 AM health check for Call Booker"
+
+# ------------------------------------------------------------------------------
+# Resources
+# ------------------------------------------------------------------------------
+resources:
+  Resources:
+
+    # ── DynamoDB Table ──────────────────────────────────────────────────────────
+    CallBookerTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tableName}
+        BillingMode: PAY_PER_REQUEST    # no capacity planning needed at MVP scale
+        TableClass: STANDARD
+        AttributeDefinitions:
+          - AttributeName: phone
+            AttributeType: S
+        KeySchema:
+          - AttributeName: phone
+            KeyType: HASH
+        TimeToLiveSpecification:
+          AttributeName: ttl
+          Enabled: true               # sessions auto-expire after 24 h
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: false   # enable when prod traffic is real
+        Tags:
+          - Key: project
+            Value: call-booker
+          - Key: stage
+            Value: ${self:custom.stage}
+
+    # ── API Gateway 4xx/5xx alarms (optional but recommended) ──────────────────
+    ApiGateway5xxAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: call-booker-5xx-${self:custom.stage}
+        AlarmDescription: "SMS webhook returning 5xx errors"
+        Namespace: AWS/ApiGateway
+        MetricName: 5XXError
+        Dimensions:
+          - Name: ApiName
+            Value: ${self:custom.stage}-call-booker
+        Statistic: Sum
+        Period: 300                 # 5-minute window
+        EvaluationPeriods: 1
+        Threshold: 3
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        TreatMissingData: notBreaching
+
+  # Expose the API Gateway endpoint as a Stack Output
+  Outputs:
+    SmsWebhookUrl:
+      Description: "Paste this URL into Twilio → Phone Number → Messaging webhook"
+      Value:
+        Fn::Join:
+          - ""
+          - - "https://"
+            - !Ref ApiGatewayRestApi
+            - ".execute-api."
+            - ${self:provider.region}
+            - ".amazonaws.com/"
+            - ${self:custom.stage}
+            - "/sms"

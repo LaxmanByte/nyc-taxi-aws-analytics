@@ -1,0 +1,12 @@
+================================================================================
+CHECKLIST SUMMARY — KEY BLOCKS FROM 53-QUESTION CHECKLIST
+================================================================================
+[PLACEHOLDER — Paste key decisions from the 53-question checklist here]
+
+Suggested sections:
+  1. Infrastructure decisions (AWS region, Lambda config, DynamoDB schema)
+  2. Voice AI decisions (Twilio vs Vapi, voice selection, language)
+  3. Business decisions (pricing, pilot terms, target market)
+  4. Legal / compliance notes
+  5. Open questions / still deciding
+

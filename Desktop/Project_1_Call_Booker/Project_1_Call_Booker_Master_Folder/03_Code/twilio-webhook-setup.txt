@@ -1,0 +1,26 @@
+================================================================================
+TWILIO WEBHOOK SETUP — STEP-BY-STEP
+================================================================================
+
+STEP 1 — Log into Twilio Console
+  URL: https://console.twilio.com
+
+STEP 2 — Go to Phone Numbers > Manage > Active Numbers
+  Select your HVAC business number.
+
+STEP 3 — Under "Voice & Fax" > "A call comes in":
+  Set to: Webhook
+  URL: https://<your-lambda-url>/call-handler
+  Method: HTTP POST
+
+STEP 4 — Set fallback URL (optional):
+  URL: https://<your-lambda-url>/call-fallback
+
+STEP 5 — Save configuration.
+
+STEP 6 — Test by calling the Twilio number and checking Lambda CloudWatch logs.
+
+Notes:
+- Use API Gateway or Lambda Function URL for the webhook endpoint.
+- Ensure IAM role has Bedrock + DynamoDB permissions.
+- Add Twilio Auth Token validation in lambda_handler.py for security.
